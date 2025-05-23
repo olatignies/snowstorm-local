@@ -1,0 +1,83 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - node.name=snowstorm
+      - cluster.name=snowstorm-cluster
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
+    networks:
+      elastic:
+        aliases:
+          - es
+    ports:
+      - "9200:9200"
+    volumes:
+      - elastic:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://es:9200"]
+      interval: 1s
+      timeout: 1s
+      retries: 60
+    mem_reservation: 4g
+
+  snowstorm:
+    image: ehealthplatformstandards/snowstorm:latest
+    container_name: snowstorm
+    restart: always
+    env_file: ./.env
+    networks:
+      elastic:
+        aliases:
+          - snowstorm
+    ports:
+      - "8080:8080"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    entrypoint: [
+      "java",
+      "-Xms2g",
+      "-Xmx4g",
+      "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+      "--add-opens", "java.base/java.util=ALL-UNNAMED",
+      "-jar", "/app/snowstorm.jar"
+    ]
+    command: [
+      "--elasticsearch.urls=http://es:9200",
+      "--syndication", # uncomment to import below terminologies + the default ones (ISO3166 etc)
+      "--hl7",
+      #"--hl7=local",
+      #"--hl7=6.1.0",
+      #"--snomed=local",
+      "--snomed=http://snomed.info/sct/11000172109", # latest belgian extension (+ international edition dependency)
+      #"--snomed=http://snomed.info/sct/11000172109/version/20250315", # specific version
+      "--extension-country-code=BE", # mandatory when loading snomed extensions
+      "--loinc",
+      #"--loinc=local",
+      #"--loinc=2.78",
+    ]
+
+  browser:
+    image: snomedinternational/snomedct-browser:latest
+    container_name: browser
+    restart: always
+    environment:
+      - API_HOST=http://snowstorm:8080/
+    networks:
+      - elastic
+    ports:
+      - "80:80"
+    depends_on:
+      - snowstorm
+    links:
+      - snowstorm:snowstorm
+
+networks:
+  elastic:
+
+volumes:
+  elastic:
