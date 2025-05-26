@@ -19,14 +19,11 @@ command: [
   "--elasticsearch.urls=http://es:9200",
   "--syndication",
   "--hl7",
-  #"--hl7=local",
   #"--hl7=6.1.0",
-  #"--loinc",
-  "--loinc=local",
+  "--loinc",
   #"--loinc=2.78",
-  #"--snomed=http://snomed.info/sct/11000172109",
-  #"--snomed=local",
-  "--snomed=http://snomed.info/sct/11000172109/version/20250315",
+  "--snomed=http://snomed.info/sct/11000172109",
+  #"--snomed=http://snomed.info/sct/11000172109/version/20250315",
   "--extension-country-code=BE"
 ]
 ```
