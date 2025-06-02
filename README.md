@@ -106,6 +106,33 @@ An empty list `[]` means the import is complete. Example of an ongoing import re
 ]
 ```
 
+Check if all terminology imports have succeeded:
+
+```bash
+curl --location 'localhost:8080/syndication/status?'
+```
+
+Example of a response with where Loinc has failed:
+
+```json
+[
+  {
+    "terminology": "hl7",
+    "requestedVersion": "latest",
+    "actualVersion": "6.3.0",
+    "status": "COMPLETED",
+    "timestamp": 174852647261
+  },
+  {
+    "terminology": "loinc",
+    "requestedVersion": "latest",
+    "exception" : "org.springframework.dao.DataAccessResourceFailureException: Connection refused",
+    "status": "FAILED",
+    "timestamp": 1748526433979
+  }
+]
+```
+
 ---
 
 ## ✅ Step 6: Validate ATC Terminology
@@ -200,3 +227,10 @@ You can use this Postman collection to test your Snowstorm instance:
 ## 📌 Legal Notice
 
 By using Snowstorm, you acknowledge and agree to the **terms and conditions** of each terminology source you import or use.
+
+---
+
+## 💡 Tips
+
+-   Modifying the .env file after a `docker compose up` requires a `docker compose up` again after a `docker compose down`. Restarting the impacted container alone isn't enough for the modified env variables to be taken into account.
+-   Make sure that enough memory is allocated to docker (> 8 GB). If you don't, the ElasticSearch container will typically fail with exit code 137.
