@@ -232,5 +232,30 @@ By using Snowstorm, you acknowledge and agree to the **terms and conditions** of
 
 ## 💡 Tips
 
--   Modifying the .env file after a `docker compose up` requires a `docker compose up` again after a `docker compose down`. Restarting the impacted container alone isn't enough for the modified env variables to be taken into account.
--   Make sure that enough memory is allocated to docker (> 8 GB). If you don't, the ElasticSearch container will typically fail with exit code 137.
+* If you modify the `.env` file **after running** `docker compose up`, you must first run `docker compose down` and then `docker compose up` again.
+  Simply restarting the affected container will **not** apply the updated environment variables.
+
+* If a **newer version** of a terminology becomes available after you’ve already imported it and you want to upgrade, you have two options:
+  – Restart the Snowstorm container
+  – Trigger an update using the [**syndication endpoint**](syndication/syndication-on-runtime.md)
+
+* You may also set up a **CRON job** that periodically calls the syndication endpoint using `curl` to ensure you’re always using the most up-to-date terminologies.
+
+---
+
+## 🐛 Debugging
+
+The logs of the Snowstorm and Elasticsearch containers are essential for troubleshooting. Here are some common issues and how to address them:
+
+* **Elasticsearch exited with code 137**
+  → The container exceeded the Docker memory limit.
+  💡 **Solution**: Increase the memory allocation to **at least 8 GB**.
+
+* **LOINC import times out after 30 seconds**
+  → The download from the LOINC website failed.
+  This could be due to **invalid credentials** (provided via environment variables), or because the **LOINC site is down or has changed**.
+  💡 **Workaround**: If the issue persists using correct credentials, use the **local import** option via the [**syndication endpoint**](syndication/syndication-on-runtime.md).
+
+* **Branch ... is already locked**
+  → This typically happens if the import process crashed or was interrupted before it could unlock the CodeSystem branch.
+  💡 **Solution**: Prune the Elasticsearch volume and reimport the terminologies.
