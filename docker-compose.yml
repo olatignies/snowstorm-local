@@ -38,6 +38,10 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+    #volumes: # examples below for externalizing the terminology download location
+      #- /home/username/Downloads:/app/hl7/terminologyFiles
+      #- /mnt/ssd/loinc:/app/loinc/terminologyFiles
+      #- /mnt/ssd/snomed:/app/snomed/terminologyFiles
     entrypoint: [
       "java",
       "-Xms2g",

@@ -70,6 +70,7 @@ LOINC will **not** be imported in this example setup.
 
 📌 **Tips**:
 - Adjust ports (80, 8080, 9200) as needed in `docker-compose.yml`.
+- Define a volume with bind mounts for externalizing the snomed/loinc and hl7 download location in case the container has a limited storage size.
 - Remove `--syndication` to skip startup imports.
 - Use `--snomed` with version URI for specific SNOMED versions.
 
