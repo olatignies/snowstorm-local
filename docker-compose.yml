@@ -1,7 +1,7 @@
 services:
-  elasticsearch:
+  elasticsearch_ehealth:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
-    container_name: elasticsearch
+    container_name: elasticsearch_ehealth
     restart: always
     environment:
       - discovery.type=single-node
@@ -24,9 +24,9 @@ services:
       retries: 60
     mem_reservation: 4g
 
-  snowstorm:
+  snowstorm_ehealth:
     image: ehealthplatformstandards/snowstorm:latest
-    container_name: snowstorm
+    container_name: snowstorm_ehealth
     restart: always
     env_file: ./.env
     networks:
@@ -36,7 +36,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      elasticsearch:
+      elasticsearch_ehealth:
         condition: service_healthy
     #volumes: # examples below for externalizing the terminology download location
       #- /home/username/Downloads:/app/hl7/terminologyFiles
@@ -48,7 +48,8 @@ services:
       "-Xmx4g",
       "--add-opens", "java.base/java.lang=ALL-UNNAMED",
       "--add-opens", "java.base/java.util=ALL-UNNAMED",
-      "-jar", "/app/snowstorm.jar"
+      "-jar", "/app/snowstorm.jar",
+      "--snowstorm.rest-api.allowUnlimitedConceptPagination","true"
     ]
     command: [
       "--elasticsearch.urls=http://es:9200",
@@ -68,20 +69,20 @@ services:
       #"--icpc2",
     ]
 
-  browser:
+  browser_ehealth:
     image: snomedinternational/snomedct-browser:latest
-    container_name: browser
+    container_name: browser_ehealth
     restart: always
     environment:
       - API_HOST=http://snowstorm:8080/
     networks:
       - elastic
     ports:
-      - "80:80"
+      - "8000:80"
     depends_on:
-      - snowstorm
+      - snowstorm_ehealth
     links:
-      - snowstorm:snowstorm
+      - snowstorm_ehealth:snowstorm
 
 networks:
   elastic:
